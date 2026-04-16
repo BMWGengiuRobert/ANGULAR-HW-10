@@ -3,18 +3,22 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { loadTopics, loadTopicsFailure, loadTopicsSuccess } from './ngrx.actions';
-import { NgrxTopic } from './ngrx.types';
+import { NgrxTopic } from '../models/ngrx.types';
+import { environment } from '../../../../environments';
 
 @Injectable()
 export class NgrxPageEffects {
   private actions$ = inject(Actions);
   private http = inject(HttpClient);
 
+  private readonly apiBaseUrl = environment.apiBaseUrl;
+
+
   loadTopics$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loadTopics),
       switchMap(() =>
-        this.http.get<NgrxTopic[]>('http://localhost:3000/ngrx/topics').pipe(
+        this.http.get<NgrxTopic[]>(`${this.apiBaseUrl}/ngrx/topics`).pipe(
           map((topics) => loadTopicsSuccess({ topics })),
           catchError((err) =>
             of(loadTopicsFailure({ error: err.message ?? 'Failed to load topics' })),

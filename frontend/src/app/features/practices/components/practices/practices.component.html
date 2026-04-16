@@ -1,0 +1,54 @@
+<app-header></app-header>
+
+@if(loading) {
+<p class="status">Loading practices...</p>
+}
+
+@if(errorMessage) {
+<p class="status status--error">{{ errorMessage }}</p>
+}
+
+<section class="accordion">
+    @for(category of categories; track category.slug) {
+    <article class="accordion-item" [class.accordion-item--open]="isOpen(category.slug)">
+
+        <button class="accordion-trigger" type="button" (click)="toggleCategory(category.slug)">
+            <span>
+                <strong>{{ category.title }}</strong>
+                <small>{{ category.description }}</small>
+            </span>
+            <span class="accordion-meta">
+                <span class="item-count">{{ category.itemCount }} items</span>
+                <span class="material-icons chevron">expand_more</span>
+            </span>
+        </button>
+
+        @if(isOpen(category.slug)) {
+        <div class="accordion-panel">
+
+            @if(!getDetails(category.slug)) {
+            <p class="status">Loading {{ category.title }} details...</p>
+            } @else {
+            <ul class="practice-list">
+                @for(item of getDetails(category.slug)?.items; track item.title) {
+                <li class="practice-card">
+                    <h3>{{ item.title }}</h3>
+                    <p>{{ item.summary }}</p>
+                    <p><strong>Details:</strong> {{ item.details }}</p>
+                    <p><strong>Why it matters:</strong> {{ item.whyItMatters }}</p>
+                    <p><strong>Good example:</strong> {{ item.goodExample }}</p>
+                    <p><strong>Bad example:</strong> {{ item.badExample }}</p>
+                    <div class="tags">
+                        @for(tag of item.tags; track tag) {
+                        <span class="tag">{{ tag }}</span>
+                        }
+                    </div>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        }
+    </article>
+    }
+</section>

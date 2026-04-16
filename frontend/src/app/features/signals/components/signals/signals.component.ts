@@ -1,6 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+
+import { environment } from '../../../../../environments';
+import { Tab } from '../../../../shared/models/tab.type';
+import { SignalsQuiz, SignalsTopic } from '../../models/signals.types';
+import { SignalsService } from '../../services/signals.service';
+
 
 @Component({
   selector: 'app-signals',
@@ -9,39 +14,40 @@ import { Component, effect, signal } from '@angular/core';
   imports: [CommonModule],
 })
 export class SignalsComponent {
-  private http: HttpClient;
+  private signalsService = inject(SignalsService);
 
-  topics = signal<any[]>([]);
-  loading = signal(false);
+  topics = signal<SignalsTopic[]>([]);
+  loading = signal<boolean>(false);
 
-  activeTab = signal<'topics' | 'quiz' | 'analogies'>('topics');
-  searchTerm = signal('');
+  activeTab = signal<Tab>('topics');
+  searchTerm = signal<string>('');
 
-  filteredTopics = signal<any[]>([]);
+  filteredTopics = signal<SignalsTopic[]>([]);
 
   expandedIndex = signal<number | null>(null);
 
-  quizzes = signal<any[]>([]);
+  quizzes = signal<SignalsQuiz[]>([]);
+  
   selectedAnswers = signal<Record<number, number>>({});
   revealedQuizzes = signal<Record<number, boolean>>({});
 
-  constructor(http: HttpClient) {
-    this.http = http;
+  constructor() {
 
     effect(() => {
       const term = this.searchTerm().toLowerCase();
       this.filteredTopics.set(this.topics().filter((t) => t.title.toLowerCase().includes(term)));
     });
 
-    effect(() => {
-      console.log('[Signals] active tab:', this.activeTab());
-    });
   }
 
   ngOnInit(): void {
     this.loading.set(true);
+    this.getTopics();
+    this.getQuizzes();
+  }
 
-    this.http.get<any[]>('http://localhost:3000/signals/topics').subscribe({
+  getTopics() {
+    this.signalsService.getTopics().subscribe({
       next: (topics) => {
         this.topics.set(topics);
         this.loading.set(false);
@@ -50,13 +56,20 @@ export class SignalsComponent {
         this.loading.set(false);
       },
     });
+  }
 
-    this.http.get<any[]>('http://localhost:3000/signals/quizzes').subscribe({
-      next: (quizzes) => this.quizzes.set(quizzes),
+  getQuizzes() {
+    this.signalsService.getQuizzes().subscribe({
+      next: (quizzes) => {
+        this.quizzes.set(quizzes);
+      },
+      error: (err) => {
+        console.error('Failed to load quizzes', err);
+      },
     });
   }
 
-  selectTab(tab: 'topics' | 'quiz' | 'analogies'): void {
+  selectTab(tab: Tab): void {
     this.activeTab.set(tab);
   }
 

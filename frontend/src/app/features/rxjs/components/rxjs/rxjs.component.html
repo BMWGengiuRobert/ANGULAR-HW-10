@@ -6,125 +6,111 @@
   </header>
 
   <nav class="tab-bar">
-    <button
-      class="tab-btn"
-      [class.tab-btn--active]="activeTab === 'topics'"
-      (click)="selectTab('topics')"
-      type="button"
-    >
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'topics'" (click)="selectTab('topics')"
+      type="button">
       📚 Topics
     </button>
-    <button
-      class="tab-btn"
-      [class.tab-btn--active]="activeTab === 'quiz'"
-      (click)="selectTab('quiz')"
-      type="button"
-    >
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'quiz'" (click)="selectTab('quiz')" type="button">
       🐛 Spot the Bug
     </button>
-    <button
-      class="tab-btn"
-      [class.tab-btn--active]="activeTab === 'analogies'"
-      (click)="selectTab('analogies')"
-      type="button"
-    >
+    <button class="tab-btn" [class.tab-btn--active]="activeTab === 'analogies'" (click)="selectTab('analogies')"
+      type="button">
       🌍 Real-world Analogies
     </button>
   </nav>
 
   <!-- TOPICS TAB -->
-  <section *ngIf="activeTab === 'topics'" class="topics">
-    <p *ngIf="loading" class="status">Loading RxJS topics...</p>
-
-    <input
-      class="search-input"
-      type="text"
-      placeholder="Search topics..."
-      [formControl]="searchControl"
-    />
-
-    <div
-      *ngFor="let topic of topics; let i = index"
-      class="topic-card"
-      [class.topic-card--expanded]="isExpanded(i)"
-    >
+  @if(activeTab === 'topics') {
+  <section class="topics">
+    @if(loading) {
+    <p class="status">Loading RxJS topics...</p>
+    }
+    <input class="search-input" type="text" placeholder="Search topics..." [formControl]="searchControl" />
+    @for(topic of topics; let i = $index; track topic.title) {
+    <div class="topic-card" [class.topic-card--expanded]="isExpanded(i)">
       <button class="topic-trigger" type="button" (click)="toggle(i)">
         <span class="topic-title">
           {{ topic.title }}
           <span class="topic-tag topic-tag--{{ topic.tag }}">{{ topic.tag }}</span>
         </span>
-        <span class="material-icons chevron" [class.chevron--open]="isExpanded(i)"
-          >expand_more</span
-        >
+        <span class="material-icons chevron" [class.chevron--open]="isExpanded(i)">expand_more</span>
       </button>
-
-      <div *ngIf="isExpanded(i)" class="topic-body">
+      @if(isExpanded(i)) {
+      <div class="topic-body">
         <p class="topic-description">{{ topic.description }}</p>
 
         <ul class="key-points">
-          <li *ngFor="let point of topic.keyPoints">{{ point }}</li>
+          @for(point of topic.keyPoints; track point) {
+          <li>{{ point }}</li>
+          }
         </ul>
 
         <pre class="code-block"><code>{{ topic.example }}</code></pre>
       </div>
+      }
     </div>
+    }
   </section>
-
+  }
   <!-- QUIZ TAB -->
-  <section *ngIf="activeTab === 'quiz'" class="quiz-section">
+  @if(activeTab === 'quiz') {
+  <section class="quiz-section">
     <p class="section-intro">
       Each snippet below has a real-world Angular/RxJS bug. Can you spot it?
     </p>
 
-    <div *ngFor="let quiz of quizzes; let i = index" class="quiz-card">
+    @for(quiz of quizzes; let i = $index; track quiz.question) {
+    <div class="quiz-card">
       <p class="quiz-question">{{ quiz.question }}</p>
       <pre class="code-block"><code>{{ quiz.codeSnippet }}</code></pre>
 
       <div class="quiz-options">
-        <button
-          *ngFor="let option of quiz.options; let optionIndex = index"
-          class="quiz-option"
-          [class.quiz-option--selected]="selectedAnswers[i] === optionIndex"
+        @for(option of quiz.options; let optionIndex = $index; track option) {
+        <button class="quiz-option" [class.quiz-option--selected]="selectedAnswers[i] === optionIndex"
           [class.quiz-option--correct]="revealedQuizzes[i] && optionIndex === quiz.correctIndex"
           [class.quiz-option--wrong]="
             revealedQuizzes[i] &&
             selectedAnswers[i] === optionIndex &&
             optionIndex !== quiz.correctIndex
-          "
-          (click)="selectAnswer(i, optionIndex)"
-          type="button"
-        >
+          " (click)="selectAnswer(i, optionIndex)" type="button">
           {{ option }}
         </button>
+        }
       </div>
 
-      <div *ngIf="isAnswered(i) && !revealedQuizzes[i]" class="quiz-actions">
+      @if(isAnswered(i) && !revealedQuizzes[i]) {
+      <div class="quiz-actions">
         <button class="reveal-btn" (click)="revealExplanation(i)" type="button">
           Reveal explanation
         </button>
       </div>
+      }
 
-      <div
-        *ngIf="revealedQuizzes[i]"
-        class="quiz-explanation"
-        [class.quiz-explanation--correct]="isCorrect(i)"
-        [class.quiz-explanation--wrong]="!isCorrect(i)"
-      >
-        <strong *ngIf="isCorrect(i)">✅ Correct!</strong>
-        <strong *ngIf="!isCorrect(i)">❌ Not quite.</strong>
+      @if(revealedQuizzes[i]) {
+      <div class="quiz-explanation" [class.quiz-explanation--correct]="isCorrect(i)"
+        [class.quiz-explanation--wrong]="!isCorrect(i)">
+        @if(isCorrect(i)) {
+        <strong>✅ Correct!</strong>
+        }@else{
+        <strong>❌ Not quite.</strong>
+        }
         {{ quiz.explanation }}
       </div>
+      }
     </div>
+    }
   </section>
-
+  }
   <!-- ANALOGIES TAB -->
-  <section *ngIf="activeTab === 'analogies'" class="analogies-section">
+  @if(activeTab === 'analogies') {
+  <section class="analogies-section">
     <p class="section-intro">
       Each concept explained through a familiar, real-world situation — no prior RxJS knowledge
       needed.
     </p>
 
-    <div *ngFor="let topic of topics" class="analogy-card">
+    @for(topic of topics; track topic.title) {
+    <div class="analogy-card">
       <div class="analogy-card-header">
         <span class="analogy-card-title">{{ topic.title }}</span>
         <span class="topic-tag topic-tag--{{ topic.tag }}">{{ topic.tag }}</span>
@@ -132,5 +118,7 @@
       <p class="analogy-card-text">{{ topic.analogy }}</p>
       <p class="analogy-card-desc">{{ topic.description }}</p>
     </div>
+    }
   </section>
+  }
 </div>

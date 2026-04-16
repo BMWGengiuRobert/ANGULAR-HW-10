@@ -1,0 +1,1 @@
+export type Tab = 'topics' | 'quiz' | 'analogies' | 'concepts' | 'flow';
