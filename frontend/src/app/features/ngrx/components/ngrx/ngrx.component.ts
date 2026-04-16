@@ -1,10 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-
-import { loadTopics } from '../../store/ngrx.actions';
-import { selectAllTopics, selectLoading } from '../../store/ngrx.selectors';
 import { NgrxQuiz, NgrxTopic } from '../../models/ngrx.types';
 import { Tab } from '../../../../shared/models/tab.type';
 import { NgrxService } from '../../services/ngrx.service';
